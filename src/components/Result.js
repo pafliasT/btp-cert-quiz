@@ -9,6 +9,7 @@ function Result() {
 
   let correctAnswersCount = 0;
 
+  // Calculate the number of correct answers
   allAnswers.forEach((answers, questionIndex) => {
     const correctAnswers = allQuestions[questionIndex].answers.filter(
       (answer) => answer.trueAnswer
@@ -21,6 +22,11 @@ function Result() {
     }
   });
 
+  // Helper function to check if the user's answer is correct
+  const isCorrectAnswer = (userAnswer, correctAnswers) => {
+    return correctAnswers.some(answer => answer.answer === userAnswer.answer && answer.trueAnswer);
+  };
+
   return (
     <div className="result">
       <div className="result-box">
@@ -31,8 +37,7 @@ function Result() {
           <img src={Image} alt="result" />
         </div>
         <p className="result-detail">
-          You answered {correctAnswersCount} out of {allQuestions.length} questions
-          correctly!
+          You answered {correctAnswersCount} out of {allQuestions.length} questions correctly!
         </p>
         <Link to="/" className="new-quiz">
           Start a new quiz!
@@ -41,12 +46,15 @@ function Result() {
       <h2 className="check-answers-title">Check Correct Answers</h2>
       <div className="check-answers-boxes">
         {allQuestions.map((item, key) => {
+          const userAnswers = allAnswers[key];
+          const correctAnswers = item.answers.filter(answer => answer.trueAnswer);
+
           return (
             <div
               key={key}
               className={
-                allAnswers[key].every((answer) => answer.trueAnswer) &&
-                allAnswers[key].length === item.answers.filter((ans) => ans.trueAnswer).length
+                userAnswers.every(answer => isCorrectAnswer(answer, correctAnswers)) &&
+                userAnswers.length === correctAnswers.length
                   ? "check-answer-box correct"
                   : "check-answer-box wrong"
               }
@@ -59,8 +67,8 @@ function Result() {
                 <div className="check-icon">
                   <i
                     className={
-                      allAnswers[key].every((answer) => answer.trueAnswer) &&
-                      allAnswers[key].length === item.answers.filter((ans) => ans.trueAnswer).length
+                      userAnswers.every(answer => isCorrectAnswer(answer, correctAnswers)) &&
+                      userAnswers.length === correctAnswers.length
                         ? "bi bi-check"
                         : "bi bi-x"
                     }
@@ -70,21 +78,26 @@ function Result() {
               <div className="check-answer-bottom">
                 <div className="answer-box">
                   <span className="answer-title">Your Answers</span>
-                  {allAnswers[key].map((answer, answerKey) => (
-                    <span key={answerKey} className="answer-text">
+                  {userAnswers.map((answer, answerKey) => (
+                    <span
+                      key={answerKey}
+                      className={
+                        isCorrectAnswer(answer, correctAnswers)
+                          ? "answer-text correct"
+                          : "answer-text wrong"
+                      }
+                    >
                       {answer.answer}
                     </span>
                   ))}
                 </div>
                 <div className="answer-box">
                   <span className="answer-title">Correct Answers</span>
-                  {item.answers
-                    .filter((answer) => answer.trueAnswer)
-                    .map((answer, answerKey) => (
-                      <span key={answerKey} className="answer-text">
-                        {answer.answer}
-                      </span>
-                    ))}
+                  {correctAnswers.map((answer, answerKey) => (
+                    <span key={answerKey} className="answer-text correct">
+                      {answer.answer}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

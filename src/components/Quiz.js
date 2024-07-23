@@ -12,6 +12,7 @@ function Quiz() {
   const [isResultButton, setIsResultButton] = useState(false);
   const [selectedIndexes, setSelectedIndexes] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState([]);
+  const [shuffledAnswers, setShuffledAnswers] = useState([]);
   const [isResult, setIsResult] = useState(false);
 
   const toggleAnswer = (index) => {
@@ -23,6 +24,20 @@ function Quiz() {
       }
     });
   };
+
+  function shuffleArray(array) {
+    const newArray = array.slice(); // Create a copy of the array
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  }
+  useEffect(() => {
+    if (questions[level] && questions[level][currentQuestion]) {
+      setShuffledAnswers(shuffleArray(questions[level][currentQuestion].answers));
+    }
+  }, [currentQuestion, questions, level]);
 
   useEffect(() => {
     if (selectedIndexes.length > 0) {
@@ -53,7 +68,7 @@ function Quiz() {
 
   const addAnswer = () => {
     const selectedAnswersList = selectedIndexes.map(
-      (index) => questions[level][currentQuestion].answers[index]
+      (index) => shuffledAnswers[index]
     );
     const newAnswers = [...selectedAnswers, selectedAnswersList];
     setSelectedAnswers(newAnswers);
@@ -94,7 +109,7 @@ function Quiz() {
             <span className="progress-mini">/{questions[level].length}</span>
           </div>
           <p className="progress-detail">
-            You solve the {currentQuestion + 1}. question out of a total of{" "}
+            You solve the {currentQuestion + 1} question out of a total of{" "}
             {questions[level].length} questions
           </p>
         </div>
@@ -109,7 +124,7 @@ function Quiz() {
       </div>
 
       <div className="answers-boxes">
-        {questions[level][currentQuestion].answers.map((answer, index) => {
+        {shuffledAnswers.map((answer, index) => {
           return (
             <label
               onClick={() => toggleAnswer(index)}
